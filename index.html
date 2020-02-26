@@ -10,14 +10,29 @@
 
 </head>
 <body>
-    <div id="container">
-        <div>
+    <header class="jumbotron">
+        UFilter
+    </header>
+    <div class="container">
+
+        <div class="">
             <video autoplay="true" id="videoElement"></video>
             <canvas id="canvas" width="640" height="480"></canvas>
         </div>
-        <button type="button" onclick=start()> Start </button>
-        <button type="button" onclick=stop()> Stop </button>
-        <button type="button" onclick=stop()> Take Photo </button>
+        <div id="button">
+            <button type="button" onclick=start()> Start </button>
+            <button type="button" onclick=stop()> Stop </button>
+            <button type="button" onclick=stop()> Take Photo </button>
+        </div>
+        <div class="filters">
+            <input type="radio" id="brightness" name="gender" value="male">
+            <label for="male">Brightness</label><br>
+            <input type="radio" id="female" name="gender" value="female">
+            <label for="female">Female</label><br>
+            <input type="radio" id="other" name="gender" value="other">
+            <label for="other">Other</label>
+
+        </div>
     </div>
     <script src="scripts/scripts.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

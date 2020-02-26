@@ -8,12 +8,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   init();
 });
 
-function draw(v,c,w,h){
-  c.drawImage(v,0,0,w,h);
-  setTimeout(draw,20,v,c,w,h);
-
-}
-
 function init(){
   video = document.querySelector("#videoElement");
   canvas = document.getElementById('canvas');
@@ -37,9 +31,25 @@ if (navigator.mediaDevices.getUserMedia) {
     });
 }
 }
+function draw(v,c,w,h){
+  c.drawImage(v,0,0,w,h);
+  setTimeout(draw,20,v,c,w,h);
+
+}
 
 function stop() {
-  video.srcObject = null;
+  var stream = video.srcObject;
+  var tracks = stream.getTracks();
+
+  for (var i = 0; i < tracks.length; i++) {
+    var track = tracks[i];
+    track.stop();
+  }
+
+  video.srcObject=null;
+  var bc=context.fillStyle="black"
+  context.fillStyle="black"
+  context.drawImage(context,0, 0, canvas.width,canvas.height)
 }
 
 function screenshot(){
