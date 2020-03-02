@@ -2,10 +2,14 @@ var video;
 var canvas;
 var context;
 var initialized = false;
-
+var is_playing = false;
 
 document.addEventListener("DOMContentLoaded", function(event) {
   init();
+  var elems  = document.querySelectorAll("input[type=range]");
+  M.Range.init(elems);
+  elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems);
 });
 
 function init(){
@@ -13,6 +17,7 @@ function init(){
   canvas = document.getElementById('canvas');
   context = canvas.getContext('2d');
   initialized = true;
+  start();
 }
 
 function start(){
@@ -21,9 +26,11 @@ if (navigator.mediaDevices.getUserMedia) {
     .then(function (stream) {
       video.srcObject = stream;
       if(initialized){
+        is_playing = true;
         draw(video,context,canvas.width,canvas.height);
       }else{
         alert("Camera is not ready, try again!");
+        is_playing = false;
       }
     })
     .catch(function (err0r) {
@@ -31,25 +38,31 @@ if (navigator.mediaDevices.getUserMedia) {
     });
 }
 }
-function draw(v,c,w,h){
-  c.drawImage(v,0,0,w,h);
-  setTimeout(draw,20,v,c,w,h);
 
+function resume(){
+  if(is_playing){
+    return;    
+  }
+  is_playing = true;
+  draw(video,context,canvas.width,canvas.height);
 }
 
-function stop() {
-  var stream = video.srcObject;
-  var tracks = stream.getTracks();
-
-  for (var i = 0; i < tracks.length; i++) {
-    var track = tracks[i];
-    track.stop();
+function draw(v,c,w,h){
+  if(is_playing){
+    c.drawImage(v,0,0,w,h);
+    setTimeout(draw,20,v,c,w,h);
   }
+}
 
-  video.srcObject=null;
-  var bc=context.fillStyle="black"
-  context.fillStyle="black"
-  context.drawImage(context,0, 0, canvas.width,canvas.height)
+function pause() {
+  if(!is_playing){
+    return;    
+  }
+  is_playing = false;
+
+  context.fillStyle="blue";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
 }
 
 function screenshot(){
