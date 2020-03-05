@@ -4,71 +4,82 @@
 <title>Filter it!</title>
 <meta charset="utf-8">
 <!-- Add Bootstrap -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> -->
 
 <link rel="stylesheet" href="styles/styles.css">
 
 <!-- Compiled and minified CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
-<!-- Compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<!-- Add materialize icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
 
 </head>
 <body>
-    <header class="jumbotron">
+    <header>
         UFilter
     </header>
+    
     <div class="container">
+      <video autoplay="true" id="videoElement"></video>
+      
+            
 
-        <div class="">
-            <video autoplay="true" id="videoElement"></video>
-            <canvas id="canvas" width="640" height="480"></canvas>
-        </div>
-        <div id="button">
-            <button type="button" onclick=resume()> Resume </button>
-            <button type="button" onclick=pause()> Pause </button>
-            <button type="button" onclick=stop()> Take Photo </button>
-        </div>
-        <div class="filters">
-            <input type="radio" id="brightness" name="gender" value="male">
-            <label for="male">Brightness</label><br>
-            <input type="radio" id="female" name="gender" value="female">
-            <label for="female">Female</label><br>
-            <input type="radio" id="other" name="gender" value="other">
-            <label for="other">Other</label>
-
+        <div class="row">
+            <div class="col s12 m6">
+              <canvas id="in_canvas" class="canvas" width="320" height="240"></canvas>
+            </div>
+            <div class="col s12 m6">
+              <canvas id="out_canvas_1" class="canvas" width="320" height="240"></canvas>
+            </div>
         </div>
 
-        <div class="input-field">
-            <select>
-              <option value="" disabled selected>Choose your option</option>
-              <option value="1">Option 1</option>
-              <option value="2">Option 2</option>
-              <option value="3">Option 3</option>
-            </select>
-            <label>Materialize Select</label>
+        <div class="row">
+        <div class="col s12 m6">
+            <canvas id="out_canvas_2" class="canvas" width="320" height="240"></canvas>
+        </div>
+
+          <div class="col s12 m6">
+            <canvas id="out_canvas_3" class="canvas" width="320" height="240"></canvas>
           </div>
-        
-          <br>
+        </div>
+  
 
+        <div id="button">
+          <a class="waves-effect waves-light btn-small" onclick=resume()> <i class="material-icons right">play_arrow</i> Resume </a>
+          <a class="waves-effect waves-light btn-small" onclick=pause()> <i class="material-icons right">pause</i> Pause </a>
+          <a class="waves-effect waves-light btn-small" onclick=take_photo()> <i class="material-icons right">photo_camera</i> Take Photo </a>
+        </div>
+
+        <br>
+        <br>
+        <br>
+        
+        
+
+    
+          <div id="bright_bar">
           <form action="#">
             <p class="range-field">
               <input type="range" id="test5" min="0" max="100" />
 
             </p>
           </form>
+          </div>
+
+          <div class="fixed-action-btn">
+          <a class="btn-floating btn-large waves-effect waves-light #26A69A" onclick=add_canvas();><i class="material-icons">add</i></a>
+          </div>
                 
       
     
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="scripts/scripts.js"></script>
+   <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="scripts/scripts.js"></script>
+
 
 </body>
 </html>
