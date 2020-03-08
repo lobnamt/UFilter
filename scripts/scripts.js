@@ -27,53 +27,58 @@ function init(){
   out_canvas_3 = document.getElementById('out_canvas_3');
   out_context_3 = out_canvas_3.getContext('2d');
   initialized = true;
-  // start();
+
+  in_canvas.parentNode.style.display = 'block';
+  start();
 }
 
-// function start(){
-// if (navigator.mediaDevices.getUserMedia) {
-//   navigator.mediaDevices.getUserMedia({ video: true })
-//     .then(function (stream) {
-//       video.srcObject = stream;
-//       if(initialized){
-//         is_playing = true;
-//         draw(video,in_context,in_canvas.width,in_canvas.height);
-//       }else{
-//         alert("Camera is not ready, try again!");
-//         is_playing = false;
-//       }
-//     })
-//     .catch(function (err0r) {
-//       console.log("Something went wrong!");
-//     });
-// }
-// }
+function start(){
+if (navigator.mediaDevices.getUserMedia) {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function (stream) {
+      video.srcObject = stream;
+      if(initialized){
+        is_playing = true;
+        draw(video,in_context,in_canvas.width,in_canvas.height);
+        draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
+        draw(video,out_context_2,out_canvas_2.width,in_canvas.height);
+        draw(video,out_context_3,out_canvas_3.width,in_canvas.height);
+      }else{
+        alert("Camera is not ready, try again!");
+        is_playing = false;
+      }
+    })
+    .catch(function (err0r) {
+      console.log("Something went wrong!");
+    });
+}
+}
 
-// function resume(){
-//   if(is_playing){
-//     return;    
-//   }
-//   is_playing = true;
-//   draw(video,in_context,in_canvas.width,in_canvas.height);
-// }
+function resume(){
+  if(is_playing){
+    return;    
+  }
+  is_playing = true;
+  draw(video,in_context,in_canvas.width,in_canvas.height);
+}
 
-// function draw(v,c,w,h){
-//   if(is_playing){
-//     c.drawImage(v,0,0,w,h);
-//     setTimeout(draw,20,v,c,w,h);
-//   }
-// }
+function draw(v,c,w,h){
+  if(is_playing){
+    c.drawImage(v,0,0,w,h);
+    setTimeout(draw,20,v,c,w,h);
+  }
+}
 
-// function pause() {
-//   if(!is_playing){
-//     return;    
-//   }
-//   is_playing = false;
+function pause() {
+  if(!is_playing){
+    return;    
+  }
+  is_playing = false;
 
-//   in_context.fillStyle="blue";
-//   in_context.fillRect(0, 0, in_canvas.width, in_canvas.height);
+  in_context.fillStyle="blue";
+  in_context.fillRect(0, 0, in_canvas.width, in_canvas.height);
 
-// }
+}
 
 // function brightness_filter(){
 //   if(!is_playing)
@@ -124,15 +129,19 @@ function init(){
 function add_canvas(){
 
   if(showing_canvases==1){
-    out_canvas_1.style.display="block";
+    out_canvas_1.parentNode.style.display="block";
+    in_canvas.parentNode.classList.remove("m12");
+    in_canvas.parentNode.classList.add("m6");
     showing_canvases++;
   }
   else if(showing_canvases==2) {
-    out_canvas_2.style.display="block"; 
+    out_canvas_2.parentNode.style.display="block"; 
     showing_canvases++;
   }
   else if(showing_canvases==3) {
-    out_canvas_3.style.display="block"; 
+    out_canvas_3.parentNode.style.display="block"; 
+    out_canvas_2.parentNode.classList.remove("m12");
+    out_canvas_2.parentNode.classList.add("m6");
     showing_canvases++;
   }
   else{
