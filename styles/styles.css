@@ -1,6 +1,6 @@
-body {
+/* body {
 	padding: 50px 30px 50px 30px;
-}
+} */
 #videoElement {
 	display: none;
 	margin-left:auto;
@@ -37,6 +37,17 @@ body {
 
 }
 
+.canvas_container_selected{
+	background: red !important;
+	padding: 10px !important;
+}
+
+.canvas_container:focus{
+	background: #d4e157
+	padding: 10px !important;
+
+}
+
 
 #button{
 	justify-content: center;
@@ -47,3 +58,22 @@ body {
 	text-align: center;
 }
 
+.msg-toast {
+    background-color: #ed3d63 !important;
+ 
+}
+
+
+#slider_container{
+	background: red;
+	height: 100%;
+	transition: width 2s;
+}
+
+.slider_closed{
+	width: 0%;
+}
+
+.slider_open{
+	width: 100%;
+}

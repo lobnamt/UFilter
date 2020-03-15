@@ -1,6 +1,7 @@
 var video;
 var in_canvas, out_canvas_1, out_canvas_2, out_canvas_3;
 var in_context, out_context_1, out_context_2, out_context_3;
+var canvas_cantainer;
 var showing_canvases = 1;
 var initialized = false;
 var is_playing = false;
@@ -10,7 +11,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
   var elems  = document.querySelectorAll("input[type=range]");
   M.Range.init(elems);
   elems = document.querySelectorAll('select');
-  var instances = M.FormSelect.init(elems);
+  var elems = document.querySelectorAll('.fixed-action-btn');
+    var instances = M.FloatingActionButton.init(elems, {
+      direction: 'top',
+      hoverEnabled: false
+    });
 });
 
 function init(){
@@ -26,10 +31,40 @@ function init(){
 
   out_canvas_3 = document.getElementById('out_canvas_3');
   out_context_3 = out_canvas_3.getContext('2d');
+
+  canvas_container = document.getElementsByClassName('canvas_cantainer')
   initialized = true;
 
   in_canvas.parentNode.style.display = 'block';
   start();
+
+
+
+  /// 
+  const canvas_divs = document.getElementsByClassName('canvas_container');
+
+  // canvas_divs.forEach(el => el.addEventListener('click'
+
+    // for (var i = 0; i < canvas_divs.length; i++) {
+    //     // console.log(canvas_divs[i]);
+    //     // canvas_divs[i].addEventListener('click', event => {
+    //     // console.log(event.target);
+    //     // console.log(event);
+    //     // event.target.style.background = 'red';
+    //   });
+  // }
+}
+
+function select_canvas(e){
+  const canvases = document.getElementsByClassName('canvas');
+    for (var i = 0; i < canvases.length; i++) {
+      console.log("test",canvases[i]);
+        // canvases[i].parentNode.style.background = 'blue';
+        canvases[i].parentNode.classList.remove("canvas_container_selected");
+  }
+  // e.parentNode.style.background = 'red';
+  e.parentNode.classList.add("canvas_container_selected");
+   console.log(e);
 }
 
 function start(){
@@ -143,9 +178,40 @@ function add_canvas(){
     out_canvas_2.parentNode.classList.remove("m12");
     out_canvas_2.parentNode.classList.add("m6");
     showing_canvases++;
+
   }
   else{
-    M.toast({html: 'no more then four canvases', classes: 'rounded background-color: #ed3d63'});
+    M.toast({html: 'no more then four canvases', classes: 'rounded msg-toast'});
+    // document.getElementById("add_del_canvas").children[0].innerHTML = "remove";
+
+  }
+
+}
+
+
+function remove_canvas(){
+
+  if(showing_canvases==4){
+    out_canvas_3.parentNode.style.display="none";
+    out_canvas_2.parentNode.classList.remove("m6");
+    out_canvas_2.parentNode.classList.add("m12");
+    showing_canvases--;
+  }
+  else if(showing_canvases==3) {
+    out_canvas_2.parentNode.style.display="none"; 
+    showing_canvases--;
+  }
+  else if(showing_canvases==2) {
+    out_canvas_1.parentNode.style.display="none"; 
+    in_canvas.parentNode.classList.remove("m6");
+    in_canvas.parentNode.classList.add("m12");
+    showing_canvases--;
+
+  }
+  else{
+    M.toast({html: 'no less than one canvas', classes: 'rounded msg-toast'});
+    // document.getElementById("add_del_canvas").children[0].innerHTML = "remove";
+
   }
 
 }
