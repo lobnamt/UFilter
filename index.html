@@ -21,26 +21,32 @@
 <body>
     <!-- <header>
       
-        <div class="container">
-          <a href="#" class="brand-logo">Logo</a>
-          <ul id="nav-mobile" class="sidenav sidenav-fixed">
+        <div>
+          <h3>UFilter</h3>
+        </div>
+    </header> -->
+    <div id="btn" style="position: absolute;top: 10px;left: 0;width: 50px;height: 40px;border: 3px solid #73AD21;">
+      <a class="waves-effect waves-light btn btn_style" onclick=slider_control()><i class="material-icons">settings</i></a>
+
+    </div>
+    <div class="row">
+      <div class="col s2" id ="slider_outer">
+        <div id="slider_container" class="slider_open">
+        
+            <!-- <br>
+            <br>
+            <hr>
+            <ul>
             <li><a href="sass.html">Sass</a></li>
             <li><a href="badges.html">Components</a></li>
             <li><a href="collapsible.html">JavaScript</a></li>
-          </ul>
+          </ul> -->
+          
         </div>
-    </header> -->
-
-    <div class="row">
-
-      <div class="col s2" style="background: rebeccapurple;height: 100vh;">
-          <div id="slider_container" class="slider_open">
-                <p>sasdasdasd</p>
-            </div>
       </div>
     
 
-      <div class="col s10">
+    <div class="col s10 filter_container" style="padding:50px;">
 
     <div class="container">
       <video autoplay="true" id="videoElement"></video>
@@ -50,31 +56,31 @@
           <div class="row">
             <div class="canvas_container col s12 m12" onclick="select_canvas(in_canvas)">
               <canvas id="in_canvas" class="canvas" width="320" height="240"></canvas>
-              <label>Input</label>
+              <label>Filterr 1</label>
             </div>
             <div class="canvas_container col s12 m6" onclick="select_canvas(out_canvas_1)">
               <canvas id="out_canvas_1" class="canvas" width="320" height="240"></canvas>
-              <label>Filter1</label>
+              <label>Filter 2</label>
             </div>
         </div>
 
         <div class="row">
         <div class="canvas_container col s12 m12" onclick="select_canvas(out_canvas_2)">
             <canvas id="out_canvas_2" class="canvas" width="320" height="240"></canvas>
-            <label>Filter2</label>
+            <label>Filter 3</label>
         </div>
 
           <div class="canvas_container col s12 m6" onclick="select_canvas(out_canvas_3)">
             <canvas id="out_canvas_3" class="canvas" width="320" height="240"></canvas>
-            <label>Filter3</label>
+            <label>Filter 4</label>
           </div>
         </div>
   
 
         <div id="button">
-          <a class="waves-effect waves-light btn-small" onclick=resume()> <i class="material-icons right">play_arrow</i> Resume </a>
-          <a class="waves-effect waves-light btn-small" onclick=pause()> <i class="material-icons right">pause</i> Pause </a>
-          <a class="waves-effect waves-light btn-small" onclick=take_photo()> <i class="material-icons right">photo_camera</i> Take Photo </a>
+          <a class="waves-effect waves-light btn-small btn_style" onclick=resume()> <i class="material-icons right">play_arrow</i> Resume </a>
+          <a class="waves-effect waves-light btn-small btn_style" onclick=pause()> <i class="material-icons right">pause</i> Pause </a>
+          <a class="waves-effect waves-light btn-small btn_style" onclick=take_photo()> <i class="material-icons right">photo_camera</i> Take Photo </a>
         </div>
           
         </div>
@@ -97,10 +103,10 @@
       </div>
 
           <div class="fixed-action-btn">
-          <a id = "add_del_canvas" class="btn-floating btn-large #26A69A"><i class="material-icons">iso</i></a>
+          <a id = "add_del_canvas" class="btn-floating btn-large light-blue darken-4"><i class="material-icons">iso</i></a>
           <ul>
-            <li><a class="btn-floating #26A69A"><i class="material-icons" onclick=add_canvas();>add</i></a></li>
-            <li><a class="btn-floating #26A69A"><i class="material-icons" onclick=remove_canvas();>remove</i></a></li>
+            <li><a class="btn-floating light-blue darken-4"><i class="material-icons" onclick=add_canvas();>add</i></a></li>
+            <li><a class="btn-floating light-blue darken-4"><i class="material-icons" onclick=remove_canvas();>remove</i></a></li>
           </ul>
           </div>
                 

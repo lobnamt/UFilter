@@ -5,6 +5,14 @@ var canvas_cantainer;
 var showing_canvases = 1;
 var initialized = false;
 var is_playing = false;
+var selected_canvas;
+const canvases = document.getElementsByClassName('canvas');
+var slider;
+var is_slider_open = true;
+var slider_width = 0;
+
+
+
 
 document.addEventListener("DOMContentLoaded", function(event) {
   init();
@@ -14,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   var elems = document.querySelectorAll('.fixed-action-btn');
     var instances = M.FloatingActionButton.init(elems, {
       direction: 'top',
-      hoverEnabled: false
+      hoverEnabled: true
     });
 });
 
@@ -32,39 +40,85 @@ function init(){
   out_canvas_3 = document.getElementById('out_canvas_3');
   out_context_3 = out_canvas_3.getContext('2d');
 
+  slider = document.getElementById("slider_container");
+  console.log(slider.clientWidth);
+  document.getElementById("btn").style.left = slider.clientWidth+ "px";
+  slider_width = slider.clientWidth;
+
+
   canvas_container = document.getElementsByClassName('canvas_cantainer')
   initialized = true;
-
   in_canvas.parentNode.style.display = 'block';
   start();
 
 
-
-  /// 
   const canvas_divs = document.getElementsByClassName('canvas_container');
 
-  // canvas_divs.forEach(el => el.addEventListener('click'
+  var ele = document.getElementsByClassName("filter_container")[0];
+  ele.addEventListener('click', function(event){
+    console.log("I am clicked",event.target);
+    if (ele === event.target){
+      console.log("unlsect",event.target);
+      for (var i = 0; i < canvases.length; i++) {
+        canvases[i].parentNode.classList.remove("canvas_container_selected");
+      }
+      return;
+    } 
 
-    // for (var i = 0; i < canvas_divs.length; i++) {
-    //     // console.log(canvas_divs[i]);
-    //     // canvas_divs[i].addEventListener('click', event => {
-    //     // console.log(event.target);
-    //     // console.log(event);
-    //     // event.target.style.background = 'red';
-    //   });
-  // }
+  }, false);
+
+}
+
+async function open_slider(){
+    slider.classList.remove("slider_closed");
+    slider.classList.add("slider_open");
+    document.getElementById("slider_outer").classList.remove("s0");
+    document.getElementById("slider_outer").classList.add("s2");
+    while(slider.clientWidth<slider_width){ 
+      await sleep(10); 
+      document.getElementById("btn").style.left = slider.clientWidth + "px";
+    }
+    is_slider_open = true;
+}
+
+async function close_slider(){
+  slider.classList.remove("slider_open");
+  slider.classList.add("slider_closed");
+  while(slider.clientWidth>0){ 
+    await sleep(10); 
+    document.getElementById("btn").style.left = slider.clientWidth + "px";
+  }
+  console.log(slider.clientWidth);
+  document.getElementById("slider_outer").classList.remove("s2");
+  document.getElementById("slider_outer").classList.add("s0");
+  is_slider_open = false;
+  
+}
+
+
+async function sleep(msec) {
+  return new Promise(resolve => setTimeout(resolve, msec));
+}
+
+function slider_control(){
+  if(is_slider_open){
+    close_slider();
+  }else{
+    open_slider();
+  }
 }
 
 function select_canvas(e){
-  const canvases = document.getElementsByClassName('canvas');
-    for (var i = 0; i < canvases.length; i++) {
-      console.log("test",canvases[i]);
-        // canvases[i].parentNode.style.background = 'blue';
-        canvases[i].parentNode.classList.remove("canvas_container_selected");
+  console.log(e);
+  if(e.parentNode.classList.contains("canvas_container_selected")){
+    console.log("I am already selected *_*");
+    e.parentNode.classList.remove("canvas_container_selected");
+    return;
   }
-  // e.parentNode.style.background = 'red';
+  for (var i = 0; i < canvases.length; i++) {
+    canvases[i].parentNode.classList.remove("canvas_container_selected");
+  }
   e.parentNode.classList.add("canvas_container_selected");
-   console.log(e);
 }
 
 function start(){
@@ -192,25 +246,38 @@ function add_canvas(){
 function remove_canvas(){
 
   if(showing_canvases==4){
+
     out_canvas_3.parentNode.style.display="none";
     out_canvas_2.parentNode.classList.remove("m6");
     out_canvas_2.parentNode.classList.add("m12");
     showing_canvases--;
+    if(selected_canvas=out_canvas_3){
+      out_canvas_3.parentNode.classList.remove("canvas_container_selected");
+      selected_canvas=0;
+    }
+    
   }
   else if(showing_canvases==3) {
     out_canvas_2.parentNode.style.display="none"; 
     showing_canvases--;
+    if(selected_canvas=out_canvas_2){
+      out_canvas_2.parentNode.classList.remove("canvas_container_selected");
+      selected_canvas=0;
+    }
   }
   else if(showing_canvases==2) {
     out_canvas_1.parentNode.style.display="none"; 
     in_canvas.parentNode.classList.remove("m6");
     in_canvas.parentNode.classList.add("m12");
     showing_canvases--;
+    if(selected_canvas=out_canvas_1){
+      out_canvas_1.parentNode.classList.remove("canvas_container_selected");
+      selected_canvas=0;
+    }
 
   }
   else{
     M.toast({html: 'no less than one canvas', classes: 'rounded msg-toast'});
-    // document.getElementById("add_del_canvas").children[0].innerHTML = "remove";
 
   }
 
