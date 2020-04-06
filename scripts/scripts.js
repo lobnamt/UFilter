@@ -10,9 +10,20 @@ const canvases = document.getElementsByClassName('canvas');
 var slider;
 var is_slider_open = true;
 var slider_width = 0;
+const filters = {
+  GRAY: 'gray',
+  BLUR: 'blur',
+  BandW: 'blackandwhite',
+  BILATERAL: 'bilateral',
+  MEDIAN_BLUR: 'medianblur'
+}
 
+const fparams = {
+  KSIZE: "ksize"
+}
 
-
+var filter_params = new Object();
+filter_params[fparams.KSIZE] = 3;
 
 document.addEventListener("DOMContentLoaded", function(event) {
   init();
@@ -132,7 +143,11 @@ if (navigator.mediaDevices.getUserMedia) {
       if(initialized){
         is_playing = true;
         draw(video,in_context,in_canvas.width,in_canvas.height);
-        draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
+        // blur(in_canvas, out_canvas_1)
+        // draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
+        // apply_filter("in_canvas","out_canvas_1","GreyScale");
+        
+        apply_filter(in_canvas, out_canvas_1,filter_params)
         draw(video,out_context_2,out_canvas_2.width,in_canvas.height);
         draw(video,out_context_3,out_canvas_3.width,in_canvas.height);
       }else{
@@ -152,6 +167,9 @@ function resume(){
   }
   is_playing = true;
   draw(video,in_context,in_canvas.width,in_canvas.height);
+  draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
+  draw(video,out_context_2,out_canvas_2.width,in_canvas.height);
+  draw(video,out_context_3,out_canvas_3.width,in_canvas.height);
 }
 
 function draw(v,c,w,h){
@@ -161,6 +179,74 @@ function draw(v,c,w,h){
   }
 }
 
+function apply_filter(in_canvas_id,out_canvas_id,params){
+  // function apply_filter(in_canvas_id,out_canvas_id,filter_type,params){
+  // if(is_playing){
+    let src = cv.imread(in_canvas_id);
+    let dst = new cv.Mat();
+  // }
+  //   // To distinguish the input and output, we graying the image.
+  //   // You can try different conversions.
+
+  //   if(filter_type == "GreyScale")
+  //   thr = params['threshold']
+  //     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+    
+  //   cv.imshow(out_canvas_id, dst);
+  let filter = filters.MEDIAN_BLUR
+
+  switch(filter){
+    // case filter.GRAY:
+
+    case filters.BLUR: {
+      let ksize = params[fparams.KSIZE];
+      if(ksize%2 == 0)
+        ksize = ksize + 1;
+      let kernel = new cv.Size(ksize, ksize);
+      let anchor = new cv.Point(-1, -1);
+      cv.blur(src, dst, kernel, anchor, cv.BORDER_DEFAULT);
+      cv.imshow(out_canvas_id, dst);
+    } break;
+    ``
+    // case filter.BandW:
+    case filters.Bilateral: {
+      cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
+      // You can try more different parameters
+      cv.bilateralFilter(src, dst, 9, 75, 75, cv.BORDER_DEFAULT);
+      cv.imshow('canvasOutput', dst);
+    } break;
+    case filters.MEDIAN_BLUR: {
+      let ksize = params[fparams.KSIZE];
+      if(ksize%2 == 0)
+        ksize = ksize + 1;
+      let kernel = new cv.Size(ksize, ksize);
+      let anchor = new cv.Point(-1, -1);
+      cv.medianBlur(src, dst, ksize);
+      cv.imshow(out_canvas_id, dst);
+    } break;
+
+  }
+  src.delete();
+  dst.delete();
+  setTimeout(apply_filter,20,in_canvas_id,out_canvas_id,params);
+
+}
+
+function blur(in_canvas_id, out_canvas_id){
+  let src = cv.imread(in_canvas_id);
+  let dst = new cv.Mat();
+  let ksize = new cv.Size(11, 11);
+  let anchor = new cv.Point(-1, -1);
+  // You can try more different parameters
+  cv.blur(src, dst, ksize, anchor, cv.BORDER_DEFAULT);
+  // cv.boxFilter(src, dst, -1, ksize, anchor, true, cv.BORDER_DEFAULT)
+  cv.imshow(out_canvas_id, dst);
+  src.delete();
+  dst.delete();
+  setTimeout(blur,20,in_canvas_id,out_canvas_id);
+
+
+}
 function pause() {
   if(!is_playing){
     return;    
@@ -171,52 +257,6 @@ function pause() {
   in_context.fillRect(0, 0, in_canvas.width, in_canvas.height);
 
 }
-
-// function brightness_filter(){
-//   if(!is_playing)
-//     return;
-//   out_context.filter = "brightness(150%)";
-//   out_context.drawImage(in_canvas,0,0);
-//   setTimeout(brightness_filter,20,in_canvas,out_context,out_canvas.width,out_canvas.height);
-// }
-
-// function take_photo(){
-//   is_playing = false;
-//   // return ctx.getImageData(0,0,c.width,c.height)
-// }
-
-// function filter_image(filter,image,var_args) {
-//   var args = [this.getPixels(image)];
-//   for (var i=2; i<arguments.length; i++) {
-//     args.push(arguments[i]);
-//   }
-//   return filter.apply(null, args);
-
-// }
-
-
-// function bright_btn(){
-//   var bright_bar = document.getElementById("bright_bar");
-//   if (bright_bar.style.display == "none") {
-//     bright_bar.style.display = "block";
-//   } else {
-//     bright_bar.style.display = "none";
-//   }
-//     in_canvas.height = 240;
-//     in_canvas.width = 320;
-//     out_canvas.style.display = "block";
-//     draw(video,out_context,out_canvas.width,out_canvas.height);
-//   //   var d = in_context.getImageData(0,0,c.width,c.height).data;
-//   //   for (var i=0; i<d.length; i+=4) {
-//   //     d[i] += adjustment;
-//   //     d[i+1] += adjustment;
-//   //     d[i+2] += adjustment;
-//   //   }
-//   // return pixels;
-
-//   //   draw(video,out_context,out_canvas.width,out_canvas.height);
-
-// }
 
 function add_canvas(){
 
