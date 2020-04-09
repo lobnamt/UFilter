@@ -1,6 +1,6 @@
 var video;
-var in_canvas, out_canvas_1, out_canvas_2, out_canvas_3;
-var in_context, out_context_1, out_context_2, out_context_3;
+var in_canvas, out_canvas_1, out_canvas_2, out_canvas_3, out_canvas_4;
+var in_context, out_context_1, out_context_2, out_context_3, out_context_4;
 var canvas_cantainer;
 var showing_canvases = 1;
 var initialized = false;
@@ -15,15 +15,29 @@ const filters = {
   BLUR: 'blur',
   BandW: 'blackandwhite',
   BILATERAL: 'bilateral',
-  MEDIAN_BLUR: 'medianblur'
+  MEDIAN_BLUR: 'medianblur',
+  THRESHOLD: 'threshold',
+  ADAPTIVE_THRESHOLD:'adaptivethreshold'
 }
 
 const fparams = {
-  KSIZE: "ksize"
+  KSIZE: "ksize",
+  DIAMETER:"diameter",
+  SIGMA_COLOR:"sigmacolor",
+  SIGMA_SPACE: "sigmaspace",
+  THRESH:'thresh',
+  BLOCK_SIZE:'blocksize'
 }
 
 var filter_params = new Object();
 filter_params[fparams.KSIZE] = 3;
+filter_params[fparams.DIAMETER]=9;
+filter_params[fparams.SIGMA_COLOR]=75;
+filter_params[fparams.SIGMA_SPACE]=75;
+filter_params[fparams.THRESH]= 100;
+filter_params[fparams.BLOCK_SIZE]=10;
+// filter_params[c]=2;
+
 
 document.addEventListener("DOMContentLoaded", function(event) {
   init();
@@ -39,7 +53,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 function init(){
   video = document.querySelector("#videoElement");
-  in_canvas = document.getElementById('in_canvas');
+  // in_canvas = document.getElementById('in_canvas');
+  // in_context = in_canvas.getContext('2d');
+
+  in_canvas = document.createElement('canvas');
+  in_canvas.id = "in_canvas";
+  in_canvas.width = 320;
+  in_canvas.height = 240;
   in_context = in_canvas.getContext('2d');
 
   out_canvas_1 = document.getElementById('out_canvas_1');
@@ -51,6 +71,9 @@ function init(){
   out_canvas_3 = document.getElementById('out_canvas_3');
   out_context_3 = out_canvas_3.getContext('2d');
 
+  out_canvas_4 = document.getElementById('out_canvas_4');
+  out_context_4 = out_canvas_3.getContext('2d');
+
   slider = document.getElementById("slider_container");
   console.log(slider.clientWidth);
   document.getElementById("btn").style.left = slider.clientWidth+ "px";
@@ -59,7 +82,7 @@ function init(){
 
   canvas_container = document.getElementsByClassName('canvas_cantainer')
   initialized = true;
-  in_canvas.parentNode.style.display = 'block';
+  out_canvas_1.parentNode.style.display = 'block';
   start();
 
 
@@ -143,6 +166,7 @@ if (navigator.mediaDevices.getUserMedia) {
       if(initialized){
         is_playing = true;
         draw(video,in_context,in_canvas.width,in_canvas.height);
+        // draw(video,out_context_1,out_canvas_1.width,out_canvas_1.height);
         // blur(in_canvas, out_canvas_1)
         // draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
         // apply_filter("in_canvas","out_canvas_1","GreyScale");
@@ -180,23 +204,34 @@ function draw(v,c,w,h){
 }
 
 function apply_filter(in_canvas_id,out_canvas_id,params){
-  // function apply_filter(in_canvas_id,out_canvas_id,filter_type,params){
-  // if(is_playing){
+
     let src = cv.imread(in_canvas_id);
     let dst = new cv.Mat();
-  // }
-  //   // To distinguish the input and output, we graying the image.
-  //   // You can try different conversions.
-
-  //   if(filter_type == "GreyScale")
-  //   thr = params['threshold']
-  //     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-    
-  //   cv.imshow(out_canvas_id, dst);
-  let filter = filters.MEDIAN_BLUR
+  
+    let filter = filters.ADAPTIVE_THRESHOLD;
 
   switch(filter){
-    // case filter.GRAY:
+    case filters.ADAPTIVE_THRESHOLD:{
+      let blocksize=params[fparams.BLOCK_SIZE];
+      if(blocksize % 2 == 0)
+        blocksize = blocksize + 1;
+      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+      // You can try more different parameters
+      cv.adaptiveThreshold(src, dst, 200, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, blocksize, 2);
+      cv.imshow(out_canvas_id, dst);
+    }break;
+
+    case filters.THRESHOLD:{
+      let thresh = params[fparams.THRESH];
+      cv.threshold(src, dst, thresh, 200, cv.THRESH_BINARY);
+      cv.imshow(out_canvas_id, dst);
+    } break;
+
+
+    case filters.GRAY:{
+      cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
+      cv.imshow(out_canvas_id, dst);
+    } break;
 
     case filters.BLUR: {
       let ksize = params[fparams.KSIZE];
@@ -207,13 +242,16 @@ function apply_filter(in_canvas_id,out_canvas_id,params){
       cv.blur(src, dst, kernel, anchor, cv.BORDER_DEFAULT);
       cv.imshow(out_canvas_id, dst);
     } break;
-    ``
+    
     // case filter.BandW:
     case filters.Bilateral: {
+      let diameter= params[fparams.DIAMETER]
+      let sigmacolor=params[fparams.SIGMA_COLOR]
+      let sigmaspace=params[fparams.SIGMA_SPACE]
       cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
       // You can try more different parameters
-      cv.bilateralFilter(src, dst, 9, 75, 75, cv.BORDER_DEFAULT);
-      cv.imshow('canvasOutput', dst);
+      cv.bilateralFilter(src, dst, diameter, sigmacolor, sigmaspace, cv.BORDER_DEFAULT);
+      cv.imshow(out_canvas_id, dst);
     } break;
     case filters.MEDIAN_BLUR: {
       let ksize = params[fparams.KSIZE];
@@ -232,21 +270,6 @@ function apply_filter(in_canvas_id,out_canvas_id,params){
 
 }
 
-function blur(in_canvas_id, out_canvas_id){
-  let src = cv.imread(in_canvas_id);
-  let dst = new cv.Mat();
-  let ksize = new cv.Size(11, 11);
-  let anchor = new cv.Point(-1, -1);
-  // You can try more different parameters
-  cv.blur(src, dst, ksize, anchor, cv.BORDER_DEFAULT);
-  // cv.boxFilter(src, dst, -1, ksize, anchor, true, cv.BORDER_DEFAULT)
-  cv.imshow(out_canvas_id, dst);
-  src.delete();
-  dst.delete();
-  setTimeout(blur,20,in_canvas_id,out_canvas_id);
-
-
-}
 function pause() {
   if(!is_playing){
     return;    
@@ -261,19 +284,19 @@ function pause() {
 function add_canvas(){
 
   if(showing_canvases==1){
-    out_canvas_1.parentNode.style.display="block";
-    in_canvas.parentNode.classList.remove("m10");
-    in_canvas.parentNode.classList.add("m5");
+    out_canvas_2.parentNode.style.display="block";
+    out_canvas_1.parentNode.classList.remove("m10");
+    out_canvas_1.parentNode.classList.add("m5");
     showing_canvases++;
   }
   else if(showing_canvases==2) {
-    out_canvas_2.parentNode.style.display="block"; 
+    out_canvas_3.parentNode.style.display="block"; 
     showing_canvases++;
   }
   else if(showing_canvases==3) {
-    out_canvas_3.parentNode.style.display="block"; 
-    out_canvas_2.parentNode.classList.remove("m10");
-    out_canvas_2.parentNode.classList.add("m5");
+    out_canvas_4.parentNode.style.display="block"; 
+    out_canvas_3.parentNode.classList.remove("m10");
+    out_canvas_3.parentNode.classList.add("m5");
     showing_canvases++;
 
   }
@@ -290,31 +313,31 @@ function remove_canvas(){
 
   if(showing_canvases==4){
 
-    out_canvas_3.parentNode.style.display="none";
-    out_canvas_2.parentNode.classList.remove("m5");
-    out_canvas_2.parentNode.classList.add("m10");
-    showing_canvases--;
-    if(selected_canvas=out_canvas_3){
-      out_canvas_3.parentNode.classList.remove("canvas_container_selected");
-      selected_canvas=0;
-    }
-    
-  }
-  else if(showing_canvases==3) {
-    out_canvas_2.parentNode.style.display="none"; 
+    out_canvas_4.parentNode.style.display="none";
+    out_canvas_3.parentNode.classList.remove("m5");
+    out_canvas_3.parentNode.classList.add("m10");
     showing_canvases--;
     if(selected_canvas=out_canvas_2){
       out_canvas_2.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
+    
+  }
+  else if(showing_canvases==3) {
+    out_canvas_3.parentNode.style.display="none"; 
+    showing_canvases--;
+    if(selected_canvas=out_canvas_3){
+      out_canvas_1.parentNode.classList.remove("canvas_container_selected");
+      selected_canvas=0;
+    }
   }
   else if(showing_canvases==2) {
-    out_canvas_1.parentNode.style.display="none"; 
-    in_canvas.parentNode.classList.remove("m5");
-    in_canvas.parentNode.classList.add("m10");
+    out_canvas_2.parentNode.style.display="none"; 
+    out_canvas_1.parentNode.classList.remove("m5");
+    out_canvas_1.parentNode.classList.add("m10");
     showing_canvases--;
-    if(selected_canvas=out_canvas_1){
-      out_canvas_1.parentNode.classList.remove("canvas_container_selected");
+    if(selected_canvas=out_canvas_2){
+      out_canvas_2.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
 
