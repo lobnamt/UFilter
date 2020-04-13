@@ -125,3 +125,17 @@ li{
     -webkit-transform:rotate(-180deg);
     transform:rotate(-180deg);
 }
+
+.thumb{
+	background-color:yellow !important;
+}
+input[type=range]{
+	background-color:yellow !important;
+
+}
+
+.txt_selected{
+	color: red;
+}
+	
+	

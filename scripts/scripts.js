@@ -10,7 +10,12 @@ const canvases = document.getElementsByClassName('canvas');
 var slider;
 var is_slider_open = true;
 var slider_width = 0;
-const filters = {
+
+var canvas_1_cache, canvas_2_cache , canvas_3_cache, canvas_4_cache;
+
+
+const filter_type = {
+  None: 'none',
   GRAY: 'gray',
   BLUR: 'blur',
   BandW: 'blackandwhite',
@@ -20,7 +25,8 @@ const filters = {
   ADAPTIVE_THRESHOLD:'adaptivethreshold'
 }
 
-const fparams = {
+const filter_params = {
+  FILTTER_TYPE: "filter_type",
   KSIZE: "ksize",
   DIAMETER:"diameter",
   SIGMA_COLOR:"sigmacolor",
@@ -29,13 +35,13 @@ const fparams = {
   BLOCK_SIZE:'blocksize'
 }
 
-var filter_params = new Object();
-filter_params[fparams.KSIZE] = 3;
-filter_params[fparams.DIAMETER]=9;
-filter_params[fparams.SIGMA_COLOR]=75;
-filter_params[fparams.SIGMA_SPACE]=75;
-filter_params[fparams.THRESH]= 100;
-filter_params[fparams.BLOCK_SIZE]=10;
+// var filter_params = {};
+// filter_params[filter_params.KSIZE] = 3;
+// filter_params[filter_params.DIAMETER]=9;
+// filter_params[filter_params.SIGMA_COLOR]=75;
+// filter_params[filter_params.SIGMA_SPACE]=75;
+// filter_params[filter_params.THRESH]= 100;
+// filter_params[filter_params.BLOCK_SIZE]=10;
 // filter_params[c]=2;
 
 
@@ -64,15 +70,24 @@ function init(){
 
   out_canvas_1 = document.getElementById('out_canvas_1');
   out_context_1 = out_canvas_1.getContext('2d');
+  canvas_1_cache = {};
+  canvas_1_cache[filter_params.FILTTER_TYPE] = filter_type.None;
 
   out_canvas_2 = document.getElementById('out_canvas_2');
   out_context_2 = out_canvas_2.getContext('2d');
+  canvas_2_cache = {};
+  canvas_2_cache[filter_params.FILTTER_TYPE] = filter_type.None;
 
   out_canvas_3 = document.getElementById('out_canvas_3');
   out_context_3 = out_canvas_3.getContext('2d');
+  canvas_3_cache = {};
+  canvas_3_cache[filter_params.FILTTER_TYPE] = filter_type.None;
 
   out_canvas_4 = document.getElementById('out_canvas_4');
   out_context_4 = out_canvas_3.getContext('2d');
+  canvas_4_cache = {};
+  canvas_4_cache[filter_params.FILTTER_TYPE] = filter_type.None;
+
 
   slider = document.getElementById("slider_container");
   console.log(slider.clientWidth);
@@ -100,6 +115,23 @@ function init(){
     } 
 
   }, false);
+
+  const filter_name_ele = document.querySelectorAll('.filter_name');
+
+  filter_name_ele.forEach(el => el.addEventListener('click', event => {
+    console.log(event.target.id);
+
+    if(selected_canvas.id == "out_canvas_1"){
+      canvas_1_cache[filter_params.FILTTER_TYPE] = event.target.id;
+    }else if(selected_canvas.id == "out_canvas_2"){
+      canvas_2_cache[filter_params.FILTTER_TYPE] = event.target.id;
+    }else if(selected_canvas.id == "out_canvas_3"){
+      canvas_3_cache[filter_params.FILTTER_TYPE] = event.target.id;
+    }else if(selected_canvas.id == "out_canvas_4"){
+      canvas_4_cache[filter_params.FILTTER_TYPE] = event.target.id;
+    }
+
+  }));
 
 }
 
@@ -146,7 +178,8 @@ function slider_control(){
 }
 
 function select_canvas(e){
-  console.log(e);
+  console.log("test ...",e);
+  selected_canvas = e;
   if(e.parentNode.classList.contains("canvas_container_selected")){
     console.log("I am already selected *_*");
     e.parentNode.classList.remove("canvas_container_selected");
@@ -166,21 +199,27 @@ if (navigator.mediaDevices.getUserMedia) {
       if(initialized){
         is_playing = true;
         draw(video,in_context,in_canvas.width,in_canvas.height);
+        apply_filter(in_canvas, out_canvas_1, canvas_1_cache);
+        apply_filter(in_canvas, out_canvas_2, canvas_2_cache);
+        apply_filter(in_canvas, out_canvas_3, canvas_3_cache);
+        apply_filter(in_canvas, out_canvas_4, canvas_4_cache);
         // draw(video,out_context_1,out_canvas_1.width,out_canvas_1.height);
         // blur(in_canvas, out_canvas_1)
         // draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
         // apply_filter("in_canvas","out_canvas_1","GreyScale");
         
-        apply_filter(in_canvas, out_canvas_1,filter_params)
-        draw(video,out_context_2,out_canvas_2.width,in_canvas.height);
-        draw(video,out_context_3,out_canvas_3.width,in_canvas.height);
+        // apply_filter(in_canvas, out_canvas_1,filter_params)
+        // draw(video,out_context_2,out_canvas_2.width,in_canvas.height);
+        // draw(video,out_context_3,out_canvas_3.width,in_canvas.height);
+        // draw(video,out_context_4,out_canvas_4.width,in_canvas.height);
+
       }else{
         alert("Camera is not ready, try again!");
         is_playing = false;
       }
     })
     .catch(function (err0r) {
-      console.log("Something went wrong!");
+      console.log("Something went wrong!: ",err0r);
     });
 }
 }
@@ -202,17 +241,30 @@ function draw(v,c,w,h){
     setTimeout(draw,20,v,c,w,h);
   }
 }
+function link_click(filter_name){
+  console.log(filter_name)
+  apply_filter(in_canvas, selected_canvas,filter_name, filter_params)
+}
 
-function apply_filter(in_canvas_id,out_canvas_id,params){
+function apply_filter(in_canvas_id,out_canvas_id, params){
 
     let src = cv.imread(in_canvas_id);
     let dst = new cv.Mat();
   
-    let filter = filters.ADAPTIVE_THRESHOLD;
+    // let filter = filter_type.ADAPTIVE_THRESHOLD;
+    // console.log(params[filter_params.FILTTER_TYPE])
 
-  switch(filter){
-    case filters.ADAPTIVE_THRESHOLD:{
-      let blocksize=params[fparams.BLOCK_SIZE];
+    let ftype = params[filter_params.FILTTER_TYPE]
+
+  switch(ftype){ // params["filter_type"]
+    case filter_type.None:{
+      cv.imshow(out_canvas_id,src);
+    }break;
+    case filter_type.ADAPTIVE_THRESHOLD:{
+      var blocksize=params[filter_params.BLOCK_SIZE];
+      if(!blocksize){
+        blocksize = 3;
+      }
       if(blocksize % 2 == 0)
         blocksize = blocksize + 1;
       cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
@@ -221,20 +273,20 @@ function apply_filter(in_canvas_id,out_canvas_id,params){
       cv.imshow(out_canvas_id, dst);
     }break;
 
-    case filters.THRESHOLD:{
-      let thresh = params[fparams.THRESH];
+    case filter_type.THRESHOLD:{
+      let thresh = params[filter_params.THRESH];
       cv.threshold(src, dst, thresh, 200, cv.THRESH_BINARY);
       cv.imshow(out_canvas_id, dst);
     } break;
 
 
-    case filters.GRAY:{
+    case filter_type.GRAY:{
       cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
       cv.imshow(out_canvas_id, dst);
     } break;
 
-    case filters.BLUR: {
-      let ksize = params[fparams.KSIZE];
+    case filter_type.BLUR: {
+      let ksize = params[filter_params.KSIZE];
       if(ksize%2 == 0)
         ksize = ksize + 1;
       let kernel = new cv.Size(ksize, ksize);
@@ -244,17 +296,17 @@ function apply_filter(in_canvas_id,out_canvas_id,params){
     } break;
     
     // case filter.BandW:
-    case filters.Bilateral: {
-      let diameter= params[fparams.DIAMETER]
-      let sigmacolor=params[fparams.SIGMA_COLOR]
-      let sigmaspace=params[fparams.SIGMA_SPACE]
+    case filter_type.Bilateral: {
+      let diameter= params[filter_params.DIAMETER]
+      let sigmacolor=params[filter_params.SIGMA_COLOR]
+      let sigmaspace=params[filter_params.SIGMA_SPACE]
       cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
       // You can try more different parameters
       cv.bilateralFilter(src, dst, diameter, sigmacolor, sigmaspace, cv.BORDER_DEFAULT);
       cv.imshow(out_canvas_id, dst);
     } break;
-    case filters.MEDIAN_BLUR: {
-      let ksize = params[fparams.KSIZE];
+    case filter_type.MEDIAN_BLUR: {
+      let ksize = params[filter_params.KSIZE];
       if(ksize%2 == 0)
         ksize = ksize + 1;
       let kernel = new cv.Size(ksize, ksize);
@@ -266,7 +318,7 @@ function apply_filter(in_canvas_id,out_canvas_id,params){
   }
   src.delete();
   dst.delete();
-  setTimeout(apply_filter,20,in_canvas_id,out_canvas_id,params);
+  setTimeout(apply_filter,20,in_canvas_id,out_canvas_id, params);
 
 }
 
