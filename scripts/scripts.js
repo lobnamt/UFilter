@@ -5,7 +5,7 @@ var canvas_cantainer;
 var showing_canvases = 1;
 var initialized = false;
 var is_playing = false;
-var selected_canvas;
+var selected_canvas= 0;
 const canvases = document.getElementsByClassName('canvas');
 var slider;
 var is_slider_open = true;
@@ -22,17 +22,20 @@ const filter_type = {
   BILATERAL: 'bilateral',
   MEDIAN_BLUR: 'medianblur',
   THRESHOLD: 'threshold',
-  ADAPTIVE_THRESHOLD:'adaptivethreshold'
+  ADAPTIVE_THRESHOLD:'adaptivethreshold',
+  CANNY:'canny'
 }
 
 const filter_params = {
   FILTTER_TYPE: "filter_type",
+  SELECTED_FILTER: "selected_filter",
   KSIZE: "ksize",
   DIAMETER:"diameter",
   SIGMA_COLOR:"sigmacolor",
-  SIGMA_SPACE: "sigmaspace",
   THRESH:'thresh',
-  BLOCK_SIZE:'blocksize'
+  BLOCK_SIZE:'blocksize',
+  THRESHOLD1: 'threshold1',
+  THRESHOLD2:'threshold2'
 }
 
 // var filter_params = {};
@@ -105,12 +108,14 @@ function init(){
 
   var ele = document.getElementsByClassName("filter_container")[0];
   ele.addEventListener('click', function(event){
-    console.log("I am clicked",event.target);
+    
+    console.log("body clicked",event.target);
     if (ele === event.target){
       console.log("unlsect",event.target);
       for (var i = 0; i < canvases.length; i++) {
         canvases[i].parentNode.classList.remove("canvas_container_selected");
       }
+    
       return;
     } 
 
@@ -120,15 +125,34 @@ function init(){
 
   filter_name_ele.forEach(el => el.addEventListener('click', event => {
     console.log(event.target.id);
-
-    if(selected_canvas.id == "out_canvas_1"){
+    if(selected_canvas == 0){
+      M.toast({html: 'Please select a canvas', classes: 'rounded msg-toast'});
+    }
+    else if(selected_canvas.id == "out_canvas_1"){
       canvas_1_cache[filter_params.FILTTER_TYPE] = event.target.id;
+      //ask soubhi
+      for (var i = 0; i < filter_name_ele.length; i++) {
+        filter_name_ele[i].classList.remove("filter_img_selected");
+      }
+      document.getElementById(event.target.id).classList.add("filter_img_selected");
     }else if(selected_canvas.id == "out_canvas_2"){
       canvas_2_cache[filter_params.FILTTER_TYPE] = event.target.id;
+      for (var i = 0; i < filter_name_ele.length; i++) {
+        filter_name_ele[i].classList.remove("filter_img_selected");
+      }
+      document.getElementById(event.target.id).classList.add("filter_img_selected");
     }else if(selected_canvas.id == "out_canvas_3"){
       canvas_3_cache[filter_params.FILTTER_TYPE] = event.target.id;
+      for (var i = 0; i < filter_name_ele.length; i++) {
+        filter_name_ele[i].classList.remove("filter_img_selected");
+      }
+      document.getElementById(event.target.id).classList.add("filter_img_selected");
     }else if(selected_canvas.id == "out_canvas_4"){
       canvas_4_cache[filter_params.FILTTER_TYPE] = event.target.id;
+      for (var i = 0; i < filter_name_ele.length; i++) {
+        filter_name_ele[i].classList.remove("filter_img_selected");
+      }
+      document.getElementById(event.target.id).classList.add("filter_img_selected");
     }
 
   }));
@@ -183,11 +207,13 @@ function select_canvas(e){
   if(e.parentNode.classList.contains("canvas_container_selected")){
     console.log("I am already selected *_*");
     e.parentNode.classList.remove("canvas_container_selected");
+    selected_canvas = 0;
     return;
   }
   for (var i = 0; i < canvases.length; i++) {
     canvases[i].parentNode.classList.remove("canvas_container_selected");
   }
+
   e.parentNode.classList.add("canvas_container_selected");
 }
 
@@ -241,10 +267,10 @@ function draw(v,c,w,h){
     setTimeout(draw,20,v,c,w,h);
   }
 }
-function link_click(filter_name){
-  console.log(filter_name)
-  apply_filter(in_canvas, selected_canvas,filter_name, filter_params)
-}
+// function link_click(filter_name){
+//   console.log(filter_name)
+//   apply_filter(in_canvas, selected_canvas,filter_name, filter_params)
+// }
 
 function apply_filter(in_canvas_id,out_canvas_id, params){
 
@@ -257,9 +283,12 @@ function apply_filter(in_canvas_id,out_canvas_id, params){
     let ftype = params[filter_params.FILTTER_TYPE]
 
   switch(ftype){ // params["filter_type"]
+    //done
     case filter_type.None:{
       cv.imshow(out_canvas_id,src);
-    }break;
+    } break;
+
+    //done
     case filter_type.ADAPTIVE_THRESHOLD:{
       var blocksize=params[filter_params.BLOCK_SIZE];
       if(!blocksize){
@@ -273,47 +302,78 @@ function apply_filter(in_canvas_id,out_canvas_id, params){
       cv.imshow(out_canvas_id, dst);
     }break;
 
+    //done
     case filter_type.THRESHOLD:{
       let thresh = params[filter_params.THRESH];
+      if(!thresh){
+        thresh = 150;
+      }
       cv.threshold(src, dst, thresh, 200, cv.THRESH_BINARY);
       cv.imshow(out_canvas_id, dst);
     } break;
 
-
+    //done
     case filter_type.GRAY:{
       cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
       cv.imshow(out_canvas_id, dst);
     } break;
 
+    //done
     case filter_type.BLUR: {
       let ksize = params[filter_params.KSIZE];
-      if(ksize%2 == 0)
+      if(ksize%2 == 0){
         ksize = ksize + 1;
+      }
+      if(!ksize){
+          ksize = 10;
+        }
       let kernel = new cv.Size(ksize, ksize);
       let anchor = new cv.Point(-1, -1);
       cv.blur(src, dst, kernel, anchor, cv.BORDER_DEFAULT);
       cv.imshow(out_canvas_id, dst);
     } break;
     
-    // case filter.BandW:
-    case filter_type.Bilateral: {
+    //done
+    case filter_type.BILATERAL: {
       let diameter= params[filter_params.DIAMETER]
       let sigmacolor=params[filter_params.SIGMA_COLOR]
-      let sigmaspace=params[filter_params.SIGMA_SPACE]
+      if(!sigmacolor){
+        sigmacolor = 75;
+      }
+      if(!diameter){
+        diameter = 9;
+      }
       cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
       // You can try more different parameters
-      cv.bilateralFilter(src, dst, diameter, sigmacolor, sigmaspace, cv.BORDER_DEFAULT);
+      cv.bilateralFilter(src, dst, diameter, sigmacolor, 75, cv.BORDER_DEFAULT);
       cv.imshow(out_canvas_id, dst);
     } break;
+    //done
     case filter_type.MEDIAN_BLUR: {
       let ksize = params[filter_params.KSIZE];
       if(ksize%2 == 0)
         ksize = ksize + 1;
-      let kernel = new cv.Size(ksize, ksize);
-      let anchor = new cv.Point(-1, -1);
+        if(!ksize){
+          ksize = 3;
+        }
       cv.medianBlur(src, dst, ksize);
       cv.imshow(out_canvas_id, dst);
+    } break; 
+    case filter_type.CANNY: {
+      let threshold1 = params[filter_params.THRESHOLD1];
+      let threshold2 = params[filter_params.THRESHOLD2];
+      if(!threshold1){
+        threshold1 = 50;
+      }
+      if(!threshold2){
+        threshold2= 100;
+      }
+      cv.cvtColor(src, src, cv.COLOR_RGB2GRAY, 0);
+      // You can try more different parameters
+      cv.Canny(src, dst, threshold1, threshold2, 3, false);
+      cv.imshow(out_canvas_id, dst);
     } break;
+
 
   }
   src.delete();
