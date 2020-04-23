@@ -12,6 +12,7 @@ var is_slider_open = true;
 var slider_width = 0;
 
 var canvas_1_cache, canvas_2_cache , canvas_3_cache, canvas_4_cache;
+// const filter_name_ele = document.querySelectorAll('.filter_name');
 
 
 const filter_type = {
@@ -60,7 +61,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
     });
 });
 
+async function load_face_models(){
+  await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+  await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/models");
+  console.log("Models loaded")
+
+}
+
+
 function init(){
+
+  load_face_models();
   video = document.querySelector("#videoElement");
   // in_canvas = document.getElementById('in_canvas');
   // in_context = in_canvas.getContext('2d');
@@ -109,7 +120,7 @@ function init(){
   var ele = document.getElementsByClassName("filter_container")[0];
   ele.addEventListener('click', function(event){
     
-    console.log("body clicked",event.target);
+    console.log("I am clicked",event.target);
     if (ele === event.target){
       console.log("unlsect",event.target);
       for (var i = 0; i < canvases.length; i++) {
@@ -169,6 +180,7 @@ async function open_slider(){
       await sleep(10); 
       document.getElementById("btn").style.left = slider.clientWidth + "px";
     }
+    $('.filter_div').fadeIn()
     is_slider_open = true;
 }
 
@@ -176,6 +188,7 @@ async function close_slider(){
   slider.classList.remove("slider_open");
   slider.classList.add("slider_closed");
   document.getElementsByClassName("slider_icon")[0].classList.add("closed");
+  $('.filter_div').fadeOut()
   while(slider.clientWidth>0){ 
     await sleep(1); 
     document.getElementById("btn").style.left = slider.clientWidth -4 + "px";
@@ -204,17 +217,34 @@ function slider_control(){
 function select_canvas(e){
   console.log("test ...",e);
   selected_canvas = e;
+  document.querySelectorAll('.filter_img').forEach(function(e){
+    console.log(e);
+    e.classList.remove("filter_img_selected");
+    });
   if(e.parentNode.classList.contains("canvas_container_selected")){
     console.log("I am already selected *_*");
     e.parentNode.classList.remove("canvas_container_selected");
     selected_canvas = 0;
+
     return;
   }
   for (var i = 0; i < canvases.length; i++) {
     canvases[i].parentNode.classList.remove("canvas_container_selected");
   }
 
+  // var aa = document.querySelectorAll('.filter_img');
+  // for (var i = 0; i < document.querySelectorAll('.filter_name').length; i++) {
+  //   aa[i].classList.remove("filter_img_selected");
+  // }
+  
   e.parentNode.classList.add("canvas_container_selected");
+  console.log("jhhjhj", e.id, e.id.slice(4, 12).concat("_cache"))
+
+  console.log(eval( e.id.slice(4, 12).concat("_cache")))
+
+  document.getElementById(eval( e.id.slice(4, 12).concat("_cache"))["filter_type"]).classList.add("filter_img_selected")
+
+  
 }
 
 function start(){

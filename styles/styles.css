@@ -148,7 +148,6 @@ input[type=range]{
 	width: 70%; */
     width: 100px;
     height: 100px;
-    background: blue;
     margin-left: auto;
     margin-right: auto;
     position: relative;
@@ -163,7 +162,6 @@ a{
     background: rgb(250, 239, 239);
     height: 120px;
     width: 100%;
-    padding: 20px;
     padding-top: 10px;
 }
 
@@ -188,11 +186,11 @@ a{
 	border-radius: 7px;
 }
 
-.filter_img:hover{
+.filter_div:hover{
 	border-radius: 7px 7px 7px 7px;
 	border: 2px solid #a85612;
-	width: 105%;
-	height: 105%;
+	width: 105px;
+	height: 105px;
 	
 }
 
