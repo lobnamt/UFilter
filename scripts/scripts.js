@@ -9,6 +9,7 @@ var selected_canvas= 0;
 const canvases = document.getElementsByClassName('canvas');
 var slider;
 var is_slider_open = true;
+var is_model_loaded = false;
 var slider_width = 0;
 
 var canvas_1_cache, canvas_2_cache , canvas_3_cache, canvas_4_cache;
@@ -65,7 +66,16 @@ async function load_face_models(){
   await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
   await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/models");
   console.log("Models loaded")
+  is_model_loaded = true;
 
+}
+
+async function detect_faces_and_landmarks(input,output){
+  cv.imshow("out_canvas_1",cv.imread(input));
+  const detections = await faceapi.detectAllFaces(input,new faceapi.TinyFaceDetectorOptions());
+  // console.log(detections);
+  faceapi.draw.drawDetections(output, detections);
+  setTimeout(detect_faces_and_landmarks,1,input,output);
 }
 
 
@@ -255,7 +265,7 @@ if (navigator.mediaDevices.getUserMedia) {
       if(initialized){
         is_playing = true;
         draw(video,in_context,in_canvas.width,in_canvas.height);
-        apply_filter(in_canvas, out_canvas_1, canvas_1_cache);
+        // apply_filter(in_canvas, out_canvas_1, canvas_1_cache);
         apply_filter(in_canvas, out_canvas_2, canvas_2_cache);
         apply_filter(in_canvas, out_canvas_3, canvas_3_cache);
         apply_filter(in_canvas, out_canvas_4, canvas_4_cache);
