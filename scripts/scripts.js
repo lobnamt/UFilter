@@ -369,6 +369,11 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
 
     let ftype = params[filter_params.FILTTER_TYPE]
 
+    if(ftype != filter_type.HALLOWEN ){
+      const img_id = "out_overlay_"+out_canvas_id.id.split("_")[2];
+      document.getElementById(img_id).style.display = "none";
+    }
+
   switch(ftype){ // params["filter_type"]
     //done
     case filter_type.None:{
@@ -494,6 +499,7 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
         const width = out_canvas_id.getBoundingClientRect().width;
         overlay.style.cssText = `
         position: absolute;
+        display: block;
         left: ${startx + overlayValues.leftOffset * scale}px;
         top: ${ starty + overlayValues.topOffset * scale}px;
         width: ${overlayValues.width * scale}px;
