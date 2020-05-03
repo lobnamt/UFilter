@@ -25,7 +25,9 @@ const filter_type = {
   MEDIAN_BLUR: 'medianblur',
   THRESHOLD: 'threshold',
   ADAPTIVE_THRESHOLD:'adaptivethreshold',
-  CANNY:'canny'
+  CANNY:'canny',
+  LANDMARK: 'landmark',
+  HALLOWEN: 'halloween'
 }
 
 const filter_params = {
@@ -37,7 +39,9 @@ const filter_params = {
   THRESH:'thresh',
   BLOCK_SIZE:'blocksize',
   THRESHOLD1: 'threshold1',
-  THRESHOLD2:'threshold2'
+  THRESHOLD2:'threshold2',
+  POSX: 'posx',
+  POSY: 'posy'
 }
 
 // var filter_params = {};
@@ -70,12 +74,16 @@ async function load_face_models(){
 
 }
 
-async function detect_faces_and_landmarks(input,output){
-  cv.imshow("out_canvas_1",cv.imread(input));
-  const detections = await faceapi.detectAllFaces(input,new faceapi.TinyFaceDetectorOptions());
-  // console.log(detections);
-  faceapi.draw.drawDetections(output, detections);
-  setTimeout(detect_faces_and_landmarks,1,input,output);
+async function detect_faces_and_landmarks(input, single_face = false){
+  var detections;
+  if(!single_face)
+     detections = faceapi.detectAllFaces(input,new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(true);
+  else
+      detections = faceapi.detectSingleFace(input,new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(true);
+
+     // console.log(detections);
+  return detections;
+  // setTimeout(detect_faces_and_landmarks,1,input,output);
 }
 
 
@@ -96,6 +104,7 @@ function init(){
   out_context_1 = out_canvas_1.getContext('2d');
   canvas_1_cache = {};
   canvas_1_cache[filter_params.FILTTER_TYPE] = filter_type.None;
+  
 
   out_canvas_2 = document.getElementById('out_canvas_2');
   out_context_2 = out_canvas_2.getContext('2d');
@@ -265,10 +274,23 @@ if (navigator.mediaDevices.getUserMedia) {
       if(initialized){
         is_playing = true;
         draw(video,in_context,in_canvas.width,in_canvas.height);
-        // apply_filter(in_canvas, out_canvas_1, canvas_1_cache);
+        apply_filter(in_canvas, out_canvas_1, canvas_1_cache);
         apply_filter(in_canvas, out_canvas_2, canvas_2_cache);
         apply_filter(in_canvas, out_canvas_3, canvas_3_cache);
         apply_filter(in_canvas, out_canvas_4, canvas_4_cache);
+
+        // canvas_1_cache[filter_params.POSX] = out_canvas_1.getBoundingClientRect().x;
+        canvas_1_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y;
+
+        // canvas_2_cache[filter_params.POSX] = out_canvas_1.getBoundingClientRect().x;
+        canvas_2_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y;
+
+        // canvas_3_cache[filter_params.POSX] = out_canvas_3.getBoundingClientRect().x;
+        canvas_3_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y + 358;
+
+        // canvas_4_cache[filter_params.POSX] = out_canvas_4.getBoundingClientRect().x;
+        canvas_4_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y + 358;
+
         // draw(video,out_context_1,out_canvas_1.width,out_canvas_1.height);
         // blur(in_canvas, out_canvas_1)
         // draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
@@ -312,7 +334,32 @@ function draw(v,c,w,h){
 //   apply_filter(in_canvas, selected_canvas,filter_name, filter_params)
 // }
 
-function apply_filter(in_canvas_id,out_canvas_id, params){
+const getOverlayValues = landmarks => {
+  const nose = landmarks.getNose()
+  const jawline = landmarks.getJawOutline()
+
+  const jawLeft = jawline[0]
+  const jawRight = jawline.splice(-1)[0]
+  const adjacent = jawRight.x - jawLeft.x
+  const opposite = jawRight.y - jawLeft.y
+  const jawLength = Math.sqrt(Math.pow(adjacent, 2) + Math.pow(opposite, 2))
+
+  // Both of these work. The chat believes atan2 is better.
+  // I don't know why. (It doesn’t break if we divide by zero.)
+  // const angle = Math.round(Math.tan(opposite / adjacent) * 100)
+  const angle = Math.atan2(opposite, adjacent) * (180 / Math.PI)
+  const width = jawLength * 2.2
+
+  return {
+      width,
+      angle,
+      leftOffset: jawLeft.x - width * 0.27,
+      topOffset: nose[0].y - width * 0.47,
+  }
+}
+
+
+async function apply_filter(in_canvas_id,out_canvas_id, params){
 
     let src = cv.imread(in_canvas_id);
     let dst = new cv.Mat();
@@ -414,11 +461,55 @@ function apply_filter(in_canvas_id,out_canvas_id, params){
       cv.imshow(out_canvas_id, dst);
     } break;
 
+    case filter_type.LANDMARK:{
+      if(is_model_loaded){
+        cv.imshow("out_canvas_1",src);
+
+        const detections = await detect_faces_and_landmarks(in_canvas_id);
+        // console.log(detections)
+        faceapi.draw.drawDetections(out_canvas_id, detections);
+        faceapi.draw.drawFaceLandmarks(out_canvas_id, detections);
+      }else{
+        // show msg
+        // Model is not loaded, refersh the page ...
+      }
+
+      
+
+    }break;
+
+    case filter_type.HALLOWEN:{
+      if(is_model_loaded){
+        cv.imshow(out_canvas_id,src);
+        const detections = await detect_faces_and_landmarks(in_canvas_id,true);
+        if (!detections){
+          break;
+        }
+        const overlayValues = getOverlayValues(detections.landmarks);
+        const scale = out_canvas_id.offsetWidth/out_canvas_id.width;
+        const overlay = document.querySelector("#out_overlay_"+out_canvas_id.id.split("_")[2]);
+        overlay.src = "images/mask_4.png";
+        const startx = out_canvas_id.getBoundingClientRect().x;
+        const starty = eval( out_canvas_id.id.slice(4, 12).concat("_cache"))[filter_params.POSY];//out_canvas_id.getBoundingClientRect().y;
+        const width = out_canvas_id.getBoundingClientRect().width;
+        overlay.style.cssText = `
+        position: absolute;
+        left: ${startx + overlayValues.leftOffset * scale}px;
+        top: ${ starty + overlayValues.topOffset * scale}px;
+        width: ${overlayValues.width * scale}px;
+        transform: rotate(${overlayValues.angle}deg);
+        `;
+      }else{
+        // show msg
+        // Model is not loaded, refersh the page ...
+      }
+    }break;
+
 
   }
   src.delete();
   dst.delete();
-  setTimeout(apply_filter,20,in_canvas_id,out_canvas_id, params);
+  setTimeout(apply_filter,0,in_canvas_id,out_canvas_id, params);
 
 }
 

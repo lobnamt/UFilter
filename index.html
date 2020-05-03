@@ -102,6 +102,22 @@
             </div>
           </div>
         </div>
+        <div class="filter_card">
+          <div class="filter_div">
+            <img id="landmark"  src="images/landmark.PNG" class="filter_name filter_img">
+            <div class="filter_title">
+              <div>Landmark</div>
+            </div>
+          </div>
+        </div>
+        <div class="filter_card">
+          <div class="filter_div">
+            <img id="halloween"  src="images/mask_4.png" class="filter_name filter_img">
+            <div class="filter_title">
+              <div>Halloween</div>
+            </div>
+          </div>
+        </div>
 
         
 
@@ -191,11 +207,13 @@
           <div class="row">
             <div class="canvas_container col s12 m10 offset-m1" onclick="select_canvas(out_canvas_1)">
               <canvas id="out_canvas_1" class="canvas" width="320" height="240"></canvas>
+              <img id="out_overlay_1"/>
               <label>Filter 1</label>
             </div>
             
             <div class="canvas_container col s12 m5 offset-m1" onclick="select_canvas(out_canvas_2)">
               <canvas id="out_canvas_2" class="canvas" width="320" height="240"></canvas>
+              <img id="out_overlay_2"/>
               <label>Filter 2</label>
             </div>
         </div>
@@ -203,11 +221,13 @@
         <div class="row">
           <div class="canvas_container col s12 m10 offset-m1" onclick="select_canvas(out_canvas_3)">
               <canvas id="out_canvas_3" class="canvas" width="320" height="240"></canvas>
+              <img id="out_overlay_3"/>
               <label>Filter 3</label>
           </div>
           
             <div class="canvas_container col s12 m5 offset-m1" onclick="select_canvas(out_canvas_4)">
               <canvas id="out_canvas_4" class="canvas" width="320" height="240"></canvas>
+              <img id="out_overlay_4"/>
               <label>Filter 4</label>
             </div>
         </div>
