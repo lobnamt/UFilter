@@ -11,6 +11,7 @@ var slider;
 var is_slider_open = true;
 var is_model_loaded = false;
 var slider_width = 0;
+var scrolly = 0;
 
 var canvas_1_cache, canvas_2_cache , canvas_3_cache, canvas_4_cache;
 // const filter_name_ele = document.querySelectorAll('.filter_name');
@@ -186,6 +187,14 @@ function init(){
     }
 
   }));
+
+
+
+  window.addEventListener("scroll", function (event) {
+    scrolly = this.scrollY;
+    console.log(scrolly)
+});
+
 
 }
 
@@ -468,7 +477,7 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
 
     case filter_type.LANDMARK:{
       if(is_model_loaded){
-        cv.imshow("out_canvas_1",src);
+        cv.imshow(out_canvas_id,src);
 
         const detections = await detect_faces_and_landmarks(in_canvas_id);
         // console.log(detections)
@@ -486,25 +495,29 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
     case filter_type.HALLOWEN:{
       if(is_model_loaded){
         cv.imshow(out_canvas_id,src);
-        const detections = await detect_faces_and_landmarks(in_canvas_id,true);
-        if (!detections){
-          break;
-        }
-        const overlayValues = getOverlayValues(detections.landmarks);
-        const scale = out_canvas_id.offsetWidth/out_canvas_id.width;
-        const overlay = document.querySelector("#out_overlay_"+out_canvas_id.id.split("_")[2]);
-        overlay.src = "images/mask_4.png";
-        const startx = out_canvas_id.getBoundingClientRect().x;
-        const starty = eval( out_canvas_id.id.slice(4, 12).concat("_cache"))[filter_params.POSY];//out_canvas_id.getBoundingClientRect().y;
-        const width = out_canvas_id.getBoundingClientRect().width;
-        overlay.style.cssText = `
-        position: absolute;
-        display: block;
-        left: ${startx + overlayValues.leftOffset * scale}px;
-        top: ${ starty + overlayValues.topOffset * scale}px;
-        width: ${overlayValues.width * scale}px;
-        transform: rotate(${overlayValues.angle}deg);
-        `;
+        apply_mask(in_canvas, out_canvas_id, "images/mask_4.png");
+        // const detections = await detect_faces_and_landmarks(in_canvas_id,true);
+        // if (!detections){
+        //   break;
+        // }
+
+        // const overlayValues = getOverlayValues(detections.landmarks);
+        // const scale = out_canvas_id.offsetWidth/out_canvas_id.width;
+        // const overlay = document.querySelector("#out_overlay_"+out_canvas_id.id.split("_")[2]);
+        // overlay.src = "images/mask_4.png";
+        // const startx = out_canvas_id.getBoundingClientRect().x;
+        // const starty = out_canvas_id.getBoundingClientRect().y;//eval( out_canvas_id.id.slice(4, 12).concat("_cache"))[filter_params.POSY];//out_canvas_id.getBoundingClientRect().y;
+        // // console.log("starty: ",starty);
+        // // console.log("overlayValues.topOffset: ",overlayValues.topOffset);
+        // const width = out_canvas_id.getBoundingClientRect().width;
+        // overlay.style.cssText = `
+        // position: absolute;
+        // display: block;
+        // left: ${startx + overlayValues.leftOffset * scale}px;
+        // top: ${ scrolly + starty + overlayValues.topOffset * scale}px;
+        // width: ${overlayValues.width * scale}px;
+        // transform: rotate(${overlayValues.angle}deg);
+        // `;
       }else{
         // show msg
         // Model is not loaded, refersh the page ...
@@ -517,6 +530,31 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
   dst.delete();
   setTimeout(apply_filter,0,in_canvas_id,out_canvas_id, params);
 
+}
+
+async function apply_mask(in_canvas, out_canvas, mask_name){
+        const detections = await detect_faces_and_landmarks(in_canvas,true);
+        if (!detections){
+          return;
+        }
+        
+        const overlayValues = getOverlayValues(detections.landmarks);
+        const scale = out_canvas.offsetWidth/out_canvas.width;
+        const overlay = document.querySelector("#out_overlay_"+out_canvas.id.split("_")[2]);
+        overlay.src = mask_name;
+        const startx = out_canvas.getBoundingClientRect().x;
+        const starty = out_canvas.getBoundingClientRect().y;//eval( out_canvas_id.id.slice(4, 12).concat("_cache"))[filter_params.POSY];//out_canvas_id.getBoundingClientRect().y;
+        // console.log("starty: ",starty);
+        // console.log("overlayValues.topOffset: ",overlayValues.topOffset);
+        const width = out_canvas.getBoundingClientRect().width;
+        overlay.style.cssText = `
+        position: absolute;
+        display: block;
+        left: ${startx + overlayValues.leftOffset * scale}px;
+        top: ${ scrolly + starty + overlayValues.topOffset * scale}px;
+        width: ${overlayValues.width * scale}px;
+        transform: rotate(${overlayValues.angle}deg);
+        `;
 }
 
 function pause() {
