@@ -28,7 +28,9 @@ const filter_type = {
   ADAPTIVE_THRESHOLD:'adaptivethreshold',
   CANNY:'canny',
   LANDMARK: 'landmark',
-  HALLOWEN: 'halloween'
+  HALLOWEN: 'halloween',
+  WEREWOLF: 'werewolf',
+  UMASS: 'umass'
 }
 
 const filter_params = {
@@ -40,9 +42,8 @@ const filter_params = {
   THRESH:'thresh',
   BLOCK_SIZE:'blocksize',
   THRESHOLD1: 'threshold1',
-  THRESHOLD2:'threshold2',
-  POSX: 'posx',
-  POSY: 'posy'
+  THRESHOLD2:'threshold2'
+ 
 }
 
 // var filter_params = {};
@@ -125,7 +126,7 @@ function init(){
 
   slider = document.getElementById("slider_container");
   console.log(slider.clientWidth);
-  document.getElementById("btn").style.left = slider.clientWidth+ "px";
+  document.getElementById("btn").style.left = ( 10 + slider.clientWidth) + "px";
   slider_width = slider.clientWidth;
 
 
@@ -192,9 +193,10 @@ function init(){
 
   window.addEventListener("scroll", function (event) {
     scrolly = this.scrollY;
-    console.log(scrolly)
 });
 
+  const slider_h = document.getElementById("out_canvas_1").getBoundingClientRect().top + document.getElementById("out_canvas_1").getBoundingClientRect().height;
+  document.getElementById("slider_container").style.height = slider_h + "px";
 
 }
 
@@ -208,6 +210,7 @@ async function open_slider(){
       await sleep(10); 
       document.getElementById("btn").style.left = slider.clientWidth + "px";
     }
+    document.getElementById("btn").style.left = ( 10 + slider.clientWidth) + "px";
     $('.filter_div').fadeIn()
     is_slider_open = true;
 }
@@ -288,18 +291,7 @@ if (navigator.mediaDevices.getUserMedia) {
         apply_filter(in_canvas, out_canvas_3, canvas_3_cache);
         apply_filter(in_canvas, out_canvas_4, canvas_4_cache);
 
-        // canvas_1_cache[filter_params.POSX] = out_canvas_1.getBoundingClientRect().x;
-        canvas_1_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y;
-
-        // canvas_2_cache[filter_params.POSX] = out_canvas_1.getBoundingClientRect().x;
-        canvas_2_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y;
-
-        // canvas_3_cache[filter_params.POSX] = out_canvas_3.getBoundingClientRect().x;
-        canvas_3_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y + 358;
-
-        // canvas_4_cache[filter_params.POSX] = out_canvas_4.getBoundingClientRect().x;
-        canvas_4_cache[filter_params.POSY] = out_canvas_1.getBoundingClientRect().y + 358;
-
+      
         // draw(video,out_context_1,out_canvas_1.width,out_canvas_1.height);
         // blur(in_canvas, out_canvas_1)
         // draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
@@ -338,11 +330,8 @@ function draw(v,c,w,h){
     setTimeout(draw,20,v,c,w,h);
   }
 }
-// function link_click(filter_name){
-//   console.log(filter_name)
-//   apply_filter(in_canvas, selected_canvas,filter_name, filter_params)
-// }
 
+//https://github.com/jlengstorf/spooky-masks-facial-recognition
 const getOverlayValues = landmarks => {
   const nose = landmarks.getNose()
   const jawline = landmarks.getJawOutline()
@@ -378,7 +367,7 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
 
     let ftype = params[filter_params.FILTTER_TYPE]
 
-    if(ftype != filter_type.HALLOWEN ){
+    if(ftype != filter_type.HALLOWEN && ftype != filter_type.WEREWOLF && ftype != filter_type.UMASS){
       const img_id = "out_overlay_"+out_canvas_id.id.split("_")[2];
       document.getElementById(img_id).style.display = "none";
     }
@@ -496,28 +485,26 @@ async function apply_filter(in_canvas_id,out_canvas_id, params){
       if(is_model_loaded){
         cv.imshow(out_canvas_id,src);
         apply_mask(in_canvas, out_canvas_id, "images/mask_4.png");
-        // const detections = await detect_faces_and_landmarks(in_canvas_id,true);
-        // if (!detections){
-        //   break;
-        // }
+      }else{
+        // show msg
+        // Model is not loaded, refersh the page ...
+      }
+    }break;
 
-        // const overlayValues = getOverlayValues(detections.landmarks);
-        // const scale = out_canvas_id.offsetWidth/out_canvas_id.width;
-        // const overlay = document.querySelector("#out_overlay_"+out_canvas_id.id.split("_")[2]);
-        // overlay.src = "images/mask_4.png";
-        // const startx = out_canvas_id.getBoundingClientRect().x;
-        // const starty = out_canvas_id.getBoundingClientRect().y;//eval( out_canvas_id.id.slice(4, 12).concat("_cache"))[filter_params.POSY];//out_canvas_id.getBoundingClientRect().y;
-        // // console.log("starty: ",starty);
-        // // console.log("overlayValues.topOffset: ",overlayValues.topOffset);
-        // const width = out_canvas_id.getBoundingClientRect().width;
-        // overlay.style.cssText = `
-        // position: absolute;
-        // display: block;
-        // left: ${startx + overlayValues.leftOffset * scale}px;
-        // top: ${ scrolly + starty + overlayValues.topOffset * scale}px;
-        // width: ${overlayValues.width * scale}px;
-        // transform: rotate(${overlayValues.angle}deg);
-        // `;
+    case filter_type.WEREWOLF:{
+      if(is_model_loaded){
+        cv.imshow(out_canvas_id,src);
+        apply_mask(in_canvas, out_canvas_id, "images/werewolf.png");
+      }else{
+        // show msg
+        // Model is not loaded, refersh the page ...
+      }
+    }break;
+
+    case filter_type.UMASS:{
+      if(is_model_loaded){
+        cv.imshow(out_canvas_id,src);
+        apply_mask(in_canvas, out_canvas_id, "images/umass.png");
       }else{
         // show msg
         // Model is not loaded, refersh the page ...
@@ -543,9 +530,7 @@ async function apply_mask(in_canvas, out_canvas, mask_name){
         const overlay = document.querySelector("#out_overlay_"+out_canvas.id.split("_")[2]);
         overlay.src = mask_name;
         const startx = out_canvas.getBoundingClientRect().x;
-        const starty = out_canvas.getBoundingClientRect().y;//eval( out_canvas_id.id.slice(4, 12).concat("_cache"))[filter_params.POSY];//out_canvas_id.getBoundingClientRect().y;
-        // console.log("starty: ",starty);
-        // console.log("overlayValues.topOffset: ",overlayValues.topOffset);
+        const starty = out_canvas.getBoundingClientRect().y;
         const width = out_canvas.getBoundingClientRect().width;
         overlay.style.cssText = `
         position: absolute;
@@ -575,17 +560,21 @@ function add_canvas(){
     out_canvas_1.parentNode.classList.remove("m10");
     out_canvas_1.parentNode.classList.add("m5");
     showing_canvases++;
+    const slider_h = 2 * (out_canvas_2.getBoundingClientRect().top + out_canvas_2.getBoundingClientRect().height);
+    document.getElementById("slider_container").style.height = slider_h + "px";
   }
   else if(showing_canvases==2) {
     out_canvas_3.parentNode.style.display="block"; 
     showing_canvases++;
+    const slider_h = out_canvas_3.getBoundingClientRect().top + out_canvas_3.getBoundingClientRect().height;
+    document.getElementById("slider_container").style.height = slider_h + "px";
   }
   else if(showing_canvases==3) {
     out_canvas_4.parentNode.style.display="block"; 
     out_canvas_3.parentNode.classList.remove("m10");
     out_canvas_3.parentNode.classList.add("m5");
     showing_canvases++;
-
+    
   }
   else{
     M.toast({html: 'no more then four canvases', classes: 'rounded msg-toast'});
@@ -608,6 +597,9 @@ function remove_canvas(){
       out_canvas_2.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
+
+    const slider_h = out_canvas_3.getBoundingClientRect().top + out_canvas_3.getBoundingClientRect().height;
+    document.getElementById("slider_container").style.height = slider_h + "px";
     
   }
   else if(showing_canvases==3) {
@@ -617,6 +609,8 @@ function remove_canvas(){
       out_canvas_1.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
+    const slider_h = 2 * (out_canvas_2.getBoundingClientRect().top + out_canvas_2.getBoundingClientRect().height);
+    document.getElementById("slider_container").style.height = slider_h + "px";
   }
   else if(showing_canvases==2) {
     out_canvas_2.parentNode.style.display="none"; 
@@ -627,6 +621,8 @@ function remove_canvas(){
       out_canvas_2.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
+    const slider_h = out_canvas_1.getBoundingClientRect().top + out_canvas_1.getBoundingClientRect().height;
+    document.getElementById("slider_container").style.height = slider_h + "px";
 
   }
   else{

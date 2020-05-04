@@ -37,30 +37,42 @@ li{
 	text-align: center;
 	border-radius: 12px;
 	display: none;
+}
 
+.canvas_container label{
+	color:#1761A0	;
+}
+
+.canvas_container:hover label{
+	color:#1761A0;
+	font-size: 15px !important;
 }
 
 .canvas_container:hover{
-	background: #cfd8dc;
+	/* background: #cfd8dc; */
 	padding: 10px !important;
-
-}
-
-.canvas_container_selected{
-	background: #01579b !important;
-	padding: 10px !important;
+	border: #1761A0 1px solid;
 	-webkit-box-shadow:0 0 20px rgba(0,0,0,0.8);
     -moz-box-shadow:0 0 20px rgba(0,0,0,0.8);
     box-shadow:0 0 20px rgba(0,0,0,0.8);
 }
 
+.canvas_container_selected{
+	/* background: #01579b !important; */
+	border: #E78200 1px solid !important;
+	padding: 10px !important;
+	-webkit-box-shadow:0 0 20px rgba(0,0,0,0.8);
+    -moz-box-shadow:0 0 20px rgba(0,0,0,0.8);
+    box-shadow:0 0 20px rgba(0,0,0,0.8);
+}
+/* 
 .canvas_container:hover label{
 	color:white !important;
 	font-size: 20px !important;
- }
+ } */
 
  .canvas_container_selected > label {
-	 color:white !important;
+	 color: #E78200 !important;
 	 font-size: 20px
  }
 
@@ -81,6 +93,7 @@ li{
 	height:100%;
 	transition: width 2s;
 	background-color:rgb(222, 227, 230);
+	direction: rtl;
 }
 
 #slider_outer{
@@ -95,6 +108,8 @@ li{
 
 .slider_open{
 	width: 100%;
+	overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .btn_style{
