@@ -66,6 +66,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
       direction: 'top',
       hoverEnabled: true
     });
+  var slider_h = document.getElementById("out_canvas_1").getBoundingClientRect().top + document.getElementById("out_canvas_1").getBoundingClientRect().height;
+  document.getElementById("slider_container").style.height = slider_h + "px";
 });
 
 async function load_face_models(){
@@ -93,8 +95,7 @@ function init(){
 
   load_face_models();
   video = document.querySelector("#videoElement");
-  // in_canvas = document.getElementById('in_canvas');
-  // in_context = in_canvas.getContext('2d');
+  
 
   in_canvas = document.createElement('canvas');
   in_canvas.id = "in_canvas";
@@ -193,10 +194,10 @@ function init(){
 
   window.addEventListener("scroll", function (event) {
     scrolly = this.scrollY;
+   
 });
 
-  const slider_h = document.getElementById("out_canvas_1").getBoundingClientRect().top + document.getElementById("out_canvas_1").getBoundingClientRect().height;
-  document.getElementById("slider_container").style.height = slider_h + "px";
+  
 
 }
 
@@ -210,7 +211,6 @@ async function open_slider(){
       await sleep(10); 
       document.getElementById("btn").style.left = slider.clientWidth + "px";
     }
-    document.getElementById("btn").style.left = ( 10 + slider.clientWidth) + "px";
     $('.filter_div').fadeIn()
     is_slider_open = true;
 }
@@ -560,20 +560,24 @@ function add_canvas(){
     out_canvas_1.parentNode.classList.remove("m10");
     out_canvas_1.parentNode.classList.add("m5");
     showing_canvases++;
-    const slider_h = 2 * (out_canvas_2.getBoundingClientRect().top + out_canvas_2.getBoundingClientRect().height);
+    var slider_h = 2 * (out_canvas_1.getBoundingClientRect().top + out_canvas_1.getBoundingClientRect().height);
     document.getElementById("slider_container").style.height = slider_h + "px";
   }
   else if(showing_canvases==2) {
     out_canvas_3.parentNode.style.display="block"; 
     showing_canvases++;
-    const slider_h = out_canvas_3.getBoundingClientRect().top + out_canvas_3.getBoundingClientRect().height;
+    const slider_h = document.getElementById("out_canvas_3").getBoundingClientRect().top + document.getElementById("out_canvas_3").getBoundingClientRect().height;
     document.getElementById("slider_container").style.height = slider_h + "px";
+    
   }
   else if(showing_canvases==3) {
     out_canvas_4.parentNode.style.display="block"; 
     out_canvas_3.parentNode.classList.remove("m10");
     out_canvas_3.parentNode.classList.add("m5");
     showing_canvases++;
+    var slider_h = 2 * (out_canvas_2.getBoundingClientRect().top + out_canvas_2.getBoundingClientRect().height);
+    document.getElementById("slider_container").style.height = slider_h + "px";
+    
     
   }
   else{
@@ -598,8 +602,6 @@ function remove_canvas(){
       selected_canvas=0;
     }
 
-    const slider_h = out_canvas_3.getBoundingClientRect().top + out_canvas_3.getBoundingClientRect().height;
-    document.getElementById("slider_container").style.height = slider_h + "px";
     
   }
   else if(showing_canvases==3) {
@@ -609,8 +611,6 @@ function remove_canvas(){
       out_canvas_1.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
-    const slider_h = 2 * (out_canvas_2.getBoundingClientRect().top + out_canvas_2.getBoundingClientRect().height);
-    document.getElementById("slider_container").style.height = slider_h + "px";
   }
   else if(showing_canvases==2) {
     out_canvas_2.parentNode.style.display="none"; 
@@ -621,9 +621,7 @@ function remove_canvas(){
       out_canvas_2.parentNode.classList.remove("canvas_container_selected");
       selected_canvas=0;
     }
-    const slider_h = out_canvas_1.getBoundingClientRect().top + out_canvas_1.getBoundingClientRect().height;
-    document.getElementById("slider_container").style.height = slider_h + "px";
-
+  
   }
   else{
     M.toast({html: 'no less than one canvas', classes: 'rounded msg-toast'});
