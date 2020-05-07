@@ -62,12 +62,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
   M.Range.init(elems);
   elems = document.querySelectorAll('select');
   var elems = document.querySelectorAll('.fixed-action-btn');
-    var instances = M.FloatingActionButton.init(elems, {
-      direction: 'top',
-      hoverEnabled: true
-    });
-  var slider_h = document.getElementById("out_canvas_1").getBoundingClientRect().top + document.getElementById("out_canvas_1").getBoundingClientRect().height;
-  document.getElementById("slider_container").style.height = slider_h + "px";
+  var instances = M.FloatingActionButton.init(elems, {
+    direction: 'top',
+    hoverEnabled: true
+  });
 });
 
 async function load_face_models(){
@@ -127,7 +125,7 @@ function init(){
 
   slider = document.getElementById("slider_container");
   console.log(slider.clientWidth);
-  document.getElementById("btn").style.left = ( 10 + slider.clientWidth) + "px";
+  document.getElementById("btn").style.left = ( 15 + slider.clientWidth) + "px";
   slider_width = slider.clientWidth;
 
 
@@ -187,6 +185,8 @@ function init(){
       }
       document.getElementById(event.target.id).classList.add("filter_img_selected");
     }
+    selected_canvas.parentElement.children[2].innerHTML = event.target.parentElement.children[1].children[0].innerHTML;
+
 
   }));
 
@@ -194,6 +194,17 @@ function init(){
 
   window.addEventListener("scroll", function (event) {
     scrolly = this.scrollY;
+    var slider_h = scrolly;
+    if (showing_canvases == 1){
+       slider_h = slider_h + out_canvas_1.getBoundingClientRect().top + out_canvas_1.getBoundingClientRect().height;
+    }else if(showing_canvases == 2){
+      slider_h = 2 * (slider_h + out_canvas_1.getBoundingClientRect().top + out_canvas_1.getBoundingClientRect().height);
+    }else if (showing_canvases == 3){
+      slider_h = slider_h + out_canvas_3.getBoundingClientRect().top + out_canvas_3.getBoundingClientRect().height;
+    }else{
+      slider_h = slider_h + (out_canvas_4.getBoundingClientRect().top + out_canvas_4.getBoundingClientRect().height);
+    }
+    slider.style.height = slider_h + "px";
    
 });
 
@@ -209,8 +220,9 @@ async function open_slider(){
     document.getElementsByClassName("slider_icon")[0].classList.remove("closed");
     while(slider.clientWidth<slider_width){ 
       await sleep(10); 
-      document.getElementById("btn").style.left = slider.clientWidth + "px";
+      document.getElementById("btn").style.left = ( 15 + slider.clientWidth) + "px";
     }
+    document.getElementById("btn").style.left = (15 + slider.clientWidth) + "px";
     $('.filter_div').fadeIn()
     is_slider_open = true;
 }
@@ -318,10 +330,26 @@ function resume(){
     return;    
   }
   is_playing = true;
-  draw(video,in_context,in_canvas.width,in_canvas.height);
-  draw(video,out_context_1,out_canvas_1.width,in_canvas.height);
-  draw(video,out_context_2,out_canvas_2.width,in_canvas.height);
-  draw(video,out_context_3,out_canvas_3.width,in_canvas.height);
+  
+  in_context.clearRect(0, 0, in_canvas.width, in_canvas.height);
+  
+}
+
+function take_photo(){
+  if (selected_canvas == 0) {
+    M.toast({html: 'Please select a canvas', classes: 'rounded msg-toast'});
+  }
+  else if(selected_canvas.parentElement.children[2].innerHTML =="Halloween" || selected_canvas.parentElement.children[2].innerHTML =="Werewolf" || selected_canvas.parentElement.children[2].innerHTML =="UMass"
+    ){
+      M.toast({html: 'Downloading mask filters is not available yet', classes: 'rounded msg-toast'});
+  }
+  else{
+    var link = document.createElement('a');
+    link.download = 'filename.png';
+    link.href = selected_canvas.toDataURL()
+    link.click();
+  }
+  
 }
 
 function draw(v,c,w,h){
@@ -548,7 +576,7 @@ function pause() {
   }
   is_playing = false;
 
-  in_context.fillStyle="blue";
+  in_context.fillStyle="white";
   in_context.fillRect(0, 0, in_canvas.width, in_canvas.height);
 
 }
@@ -560,25 +588,16 @@ function add_canvas(){
     out_canvas_1.parentNode.classList.remove("m10");
     out_canvas_1.parentNode.classList.add("m5");
     showing_canvases++;
-    var slider_h = 2 * (out_canvas_1.getBoundingClientRect().top + out_canvas_1.getBoundingClientRect().height);
-    document.getElementById("slider_container").style.height = slider_h + "px";
   }
   else if(showing_canvases==2) {
     out_canvas_3.parentNode.style.display="block"; 
     showing_canvases++;
-    const slider_h = document.getElementById("out_canvas_3").getBoundingClientRect().top + document.getElementById("out_canvas_3").getBoundingClientRect().height;
-    document.getElementById("slider_container").style.height = slider_h + "px";
-    
   }
   else if(showing_canvases==3) {
     out_canvas_4.parentNode.style.display="block"; 
     out_canvas_3.parentNode.classList.remove("m10");
     out_canvas_3.parentNode.classList.add("m5");
     showing_canvases++;
-    var slider_h = 2 * (out_canvas_2.getBoundingClientRect().top + out_canvas_2.getBoundingClientRect().height);
-    document.getElementById("slider_container").style.height = slider_h + "px";
-    
-    
   }
   else{
     M.toast({html: 'no more then four canvases', classes: 'rounded msg-toast'});
