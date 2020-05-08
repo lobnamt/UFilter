@@ -125,7 +125,7 @@ function init(){
 
   slider = document.getElementById("slider_container");
   console.log(slider.clientWidth);
-  document.getElementById("btn").style.left = ( 15 + slider.clientWidth) + "px";
+  document.getElementById("btn").style.left = ( slider.offsetWidth) + "px";
   slider_width = slider.clientWidth;
 
 
@@ -220,9 +220,9 @@ async function open_slider(){
     document.getElementsByClassName("slider_icon")[0].classList.remove("closed");
     while(slider.clientWidth<slider_width){ 
       await sleep(10); 
-      document.getElementById("btn").style.left = ( 15 + slider.clientWidth) + "px";
+      document.getElementById("btn").style.left = (slider.offsetWidth) + "px";
     }
-    document.getElementById("btn").style.left = (15 + slider.clientWidth) + "px";
+    document.getElementById("btn").style.left = (slider.offsetWidth) + "px";
     $('.filter_div').fadeIn()
     is_slider_open = true;
 }
@@ -234,7 +234,7 @@ async function close_slider(){
   $('.filter_div').fadeOut()
   while(slider.clientWidth>0){ 
     await sleep(1); 
-    document.getElementById("btn").style.left = slider.clientWidth -4 + "px";
+    document.getElementById("btn").style.left = slider.offsetWidth + "px";
   }
   console.log(slider.clientWidth);
   document.getElementById("slider_outer").classList.remove("s2");
@@ -330,9 +330,7 @@ function resume(){
     return;    
   }
   is_playing = true;
-  
-  in_context.clearRect(0, 0, in_canvas.width, in_canvas.height);
-  
+  draw(video,in_context,in_canvas.width,in_canvas.height);
 }
 
 function take_photo(){
